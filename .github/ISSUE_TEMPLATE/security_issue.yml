@@ -1,0 +1,76 @@
+name: 🔒 Security Issue
+description: Report a security vulnerability (non-critical - for critical issues reach out to me directly)
+title: "[SECURITY] "
+labels: ["security", "priority: high"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **For critical security vulnerabilities, please reach out to me directly instead of creating a public issue.**
+        
+        This template is for non-critical security concerns that can be discussed publicly.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity Assessment
+      description: How severe do you believe this issue is?
+      options:
+        - Low - Minor security improvement
+        - Medium - Potential vulnerability with limited impact
+        - High - Significant security concern (consider private disclosure)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Security Issue Description
+      description: Describe the security concern
+      placeholder: What is the security issue?
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Potential Impact
+      description: What could happen if this issue is exploited?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce (if applicable)
+      description: How can we verify this issue?
+      placeholder: |
+        1. Step 1
+        2. Step 2
+        3. Observe security concern
+
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommended Fix
+      description: If you have suggestions for how to fix this, please share.
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: CVE numbers, CWE classifications, or external references
+      placeholder: |
+        - CVE-XXXX-XXXXX
+        - CWE-XXX
+        - https://...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: This is NOT a critical vulnerability (critical issues should be emailed directly)
+          required: true
+        - label: I have not included any sensitive data, credentials, or PII in this report
+          required: true

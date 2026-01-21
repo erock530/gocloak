@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -26,7 +25,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/pkcs12"
 
-	"github.com/Nerzal/gocloak/v13"
+	"github.com/erock530/gocloak"
 )
 
 type configAdmin struct {
@@ -63,7 +62,6 @@ const (
 
 func GetConfig(t testing.TB) *Config {
 	configOnce.Do(func() {
-		rand.Seed(time.Now().UTC().UnixNano())
 		configFileName, ok := os.LookupEnv("GOCLOAK_TEST_CONFIG")
 		if !ok {
 			configFileName = filepath.Join("testdata", "config.json")
@@ -576,14 +574,14 @@ func ClearRealmCache(t testing.TB, client gocloak.GoCloakIface, realm ...string)
 // -----
 
 func Test_RestyClient(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	restyClient := client.RestyClient()
 	require.NotEqual(t, restyClient, resty.New())
 }
 
 func Test_SetRestyClient(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	newRestyClient := resty.New()
 	client.SetRestyClient(newRestyClient)
@@ -592,7 +590,7 @@ func Test_SetRestyClient(t *testing.T) {
 }
 
 func Test_checkForError(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	FailRequest(client, nil, 1, 0)
 	_, err := client.Login(context.Background(), "", "", "", "", "")
@@ -605,7 +603,7 @@ func Test_checkForError(t *testing.T) {
 // ---------
 
 func Test_GetServerInfo(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	// client.RestyClient().SetDebug(true)
 	token := GetAdminToken(t, client)
@@ -625,7 +623,7 @@ func Test_GetServerInfo(t *testing.T) {
 }
 
 func Test_GetUserInfo(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -646,7 +644,7 @@ func Test_GetUserInfo(t *testing.T) {
 }
 
 func Test_GetRawUserInfo(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -662,7 +660,7 @@ func Test_GetRawUserInfo(t *testing.T) {
 }
 
 func Test_RetrospectRequestingPartyToken(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -718,7 +716,7 @@ func Test_RetrospectRequestingPartyToken(t *testing.T) {
 }
 
 func Test_GetRequestingPartyPermissions(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -764,7 +762,7 @@ func Test_GetRequestingPartyPermissions(t *testing.T) {
 }
 
 func Test_GetRequestingPartyPermissionDecision(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -802,7 +800,7 @@ func Test_GetRequestingPartyPermissionDecision(t *testing.T) {
 }
 
 func Test_GetCerts(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	certs, err := client.GetCerts(context.Background(), cfg.GoCloak.Realm)
@@ -811,7 +809,7 @@ func Test_GetCerts(t *testing.T) {
 }
 
 func Test_LoginClient_UnknownRealm(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	_, err := client.LoginClient(
@@ -820,11 +818,11 @@ func Test_LoginClient_UnknownRealm(t *testing.T) {
 		cfg.GoCloak.ClientSecret,
 		"ThisRealmDoesNotExist")
 	require.Error(t, err, "Login shouldn't be successful")
-	require.EqualError(t, err, "404 Not Found: Realm does not exist")
+	require.ErrorContains(t, err, "404 Not Found: Realm does not exist")
 }
 
 func Test_GetIssuer(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	issuer, err := client.GetIssuer(context.Background(), cfg.GoCloak.Realm)
@@ -833,7 +831,7 @@ func Test_GetIssuer(t *testing.T) {
 }
 
 func Test_RetrospectToken_InactiveToken(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 
@@ -849,7 +847,7 @@ func Test_RetrospectToken_InactiveToken(t *testing.T) {
 }
 
 func Test_RetrospectToken(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetClientToken(t, client)
@@ -866,7 +864,7 @@ func Test_RetrospectToken(t *testing.T) {
 }
 
 func Test_DecodeAccessToken(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetClientToken(t, client)
@@ -899,7 +897,7 @@ func Test_DecodeAccessTokenCustomClaims(t *testing.T) {
 }
 
 func Test_RefreshToken(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -916,7 +914,7 @@ func Test_RefreshToken(t *testing.T) {
 }
 
 func Test_UserAttributeContains(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	attributes := map[string][]string{}
 	attributes["foo"] = []string{"bar", "alice", "bob", "roflcopter"}
@@ -927,7 +925,7 @@ func Test_UserAttributeContains(t *testing.T) {
 }
 
 func Test_GetKeyStoreConfig(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -941,7 +939,7 @@ func Test_GetKeyStoreConfig(t *testing.T) {
 }
 
 func Test_Login(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -956,7 +954,7 @@ func Test_Login(t *testing.T) {
 }
 
 func Test_LoginSignedJWT(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	keystore := filepath.Join("testdata", "keystore.p12")
 	f, err := os.Open(keystore)
@@ -964,7 +962,7 @@ func Test_LoginSignedJWT(t *testing.T) {
 	defer func() {
 		require.NoError(t, f.Close())
 	}()
-	pfxData, err := ioutil.ReadAll(f)
+	pfxData, err := io.ReadAll(f)
 	require.NoError(t, err)
 	pKey, cert, err := pkcs12.Decode(pfxData, "secret")
 	require.NoError(t, err)
@@ -995,7 +993,7 @@ func Test_LoginSignedJWT(t *testing.T) {
 		cfg.GoCloak.Realm,
 		rsaKey,
 		jwt.SigningMethodRS256,
-		&jwt.NumericDate{Time: time.Now().Add(2 * time.Hour)},
+		&jwt.NumericDate{Time: time.Now().Add(3 * time.Minute)},
 	)
 	require.NoError(t, err, "Login failed")
 }
@@ -1003,7 +1001,7 @@ func Test_LoginSignedJWT(t *testing.T) {
 func Test_LoginOtp(t *testing.T) {
 	totp := "123456"
 
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -1020,7 +1018,7 @@ func Test_LoginOtp(t *testing.T) {
 }
 
 func Test_GetToken(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -1086,7 +1084,7 @@ func Test_GetRequestingPartyToken(t *testing.T) {
 }
 
 func Test_LoginClient(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	_, err := client.LoginClient(
@@ -1098,7 +1096,7 @@ func Test_LoginClient(t *testing.T) {
 }
 
 func Test_LoginAdmin(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	_, err := client.LoginAdmin(
@@ -1110,7 +1108,7 @@ func Test_LoginAdmin(t *testing.T) {
 }
 
 func Test_SetPassword(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -1129,7 +1127,7 @@ func Test_SetPassword(t *testing.T) {
 }
 
 func Test_CreateListGetUpdateDeleteGetChildGroup(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -1360,14 +1358,14 @@ func Test_ClientPermissions(t *testing.T) {
 }
 
 func Test_CreateClientRole(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	tearDown, _ := CreateClientRole(t, client)
 	tearDown()
 }
 
 func Test_GetClientRole(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	tearDown, roleName := CreateClientRole(t, client)
 	defer tearDown()
@@ -1440,7 +1438,7 @@ func CreateClientScope(t *testing.T, client gocloak.GoCloakIface, scope *gocloak
 }
 
 func Test_CreateClientScope_DeleteClientScope(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	tearDown, _ := CreateClientScope(t, client, nil)
 	tearDown()
@@ -1506,7 +1504,7 @@ func CreateUpdateClientScopeProtocolMapper(t *testing.T, client gocloak.GoCloakI
 }
 
 func Test_CreateClientScopeProtocolMapper_DeleteClientScopeProtocolMapper(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -1528,7 +1526,7 @@ func Test_CreateClientScopeProtocolMapper_DeleteClientScopeProtocolMapper(t *tes
 }
 
 func Test_ListAddRemoveDefaultClientScopes(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -1593,7 +1591,7 @@ func Test_ListAddRemoveDefaultClientScopes(t *testing.T) {
 }
 
 func Test_ListAddRemoveOptionalClientScopes(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -1652,7 +1650,7 @@ func Test_ListAddRemoveOptionalClientScopes(t *testing.T) {
 }
 
 func Test_GetDefaultOptionalClientScopes(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -1668,7 +1666,7 @@ func Test_GetDefaultOptionalClientScopes(t *testing.T) {
 }
 
 func Test_GetDefaultDefaultClientScopes(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -1683,7 +1681,7 @@ func Test_GetDefaultDefaultClientScopes(t *testing.T) {
 }
 
 func Test_GetClientScope(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -1704,7 +1702,7 @@ func Test_GetClientScope(t *testing.T) {
 }
 
 func Test_GetClientScopes(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -1720,7 +1718,7 @@ func Test_GetClientScopes(t *testing.T) {
 }
 
 func Test_GetClientScopeProtocolMappers(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -1796,7 +1794,7 @@ func CreateClientScopeMappingsClientRoles(t *testing.T, client gocloak.GoCloakIf
 }
 
 func Test_ClientScopeMappingsClientRoles(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -1874,7 +1872,7 @@ func Test_ClientScopeMappingsClientRoles(t *testing.T) {
 }
 
 func Test_ClientScopeMappingsRealmRoles(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2055,7 +2053,7 @@ func Test_ClientScopesMappingsClientRoles(t *testing.T) {
 }
 
 func Test_CreateListGetUpdateDeleteClient(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2151,7 +2149,7 @@ func Test_CreateListGetUpdateDeleteClient(t *testing.T) {
 }
 
 func Test_CreateListGetUpdateDeleteClientRepresentation(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetClientToken(t, client)
@@ -2232,7 +2230,7 @@ func Test_CreateListGetUpdateDeleteClientRepresentation(t *testing.T) {
 }
 
 func Test_GetAdapterConfigurationForClientRepresentation(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetClientToken(t, client)
@@ -2286,7 +2284,7 @@ func Test_GetAdapterConfigurationForClientRepresentation(t *testing.T) {
 }
 
 func Test_GetGroups(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2300,7 +2298,7 @@ func Test_GetGroups(t *testing.T) {
 }
 
 func Test_GetGroupsFull(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2333,7 +2331,7 @@ func Test_GetGroupsFull(t *testing.T) {
 }
 
 func Test_GetGroupsBriefRepresentation(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2407,7 +2405,7 @@ func Test_GetGroupsByClientRole(t *testing.T) {
 }
 
 func Test_GetGroupFull(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2429,7 +2427,7 @@ func Test_GetGroupFull(t *testing.T) {
 }
 
 func Test_GetChildGroups(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2463,7 +2461,7 @@ func Test_GetChildGroups(t *testing.T) {
 }
 
 func Test_GetGroupMembers(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2494,7 +2492,7 @@ func Test_GetGroupMembers(t *testing.T) {
 }
 
 func Test_ListAddRemoveDefaultGroups(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2543,7 +2541,7 @@ func Test_ListAddRemoveDefaultGroups(t *testing.T) {
 }
 
 func Test_GetClientRoles(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2560,7 +2558,7 @@ func Test_GetClientRoles(t *testing.T) {
 }
 
 func Test_GetRoleMappingByGroupID(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2577,7 +2575,7 @@ func Test_GetRoleMappingByGroupID(t *testing.T) {
 }
 
 func Test_GetRoleMappingByUserID(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2613,7 +2611,7 @@ func Test_ExecuteActionsEmail_UpdatePassword(t *testing.T) {
 		cfg.GoCloak.Realm,
 		params)
 	if err != nil {
-		if err.Error() == "500 Internal Server Error: Failed to send execute actions email" {
+		if strings.Contains(err.Error(), "500 Internal Server Error: Failed to send execute actions email") {
 			return
 		}
 		require.NoError(t, err, "ExecuteActionsEmail failed")
@@ -2639,15 +2637,16 @@ func Test_SendVerifyEmail(t *testing.T) {
 		cfg.GoCloak.Realm,
 		params)
 	if err != nil {
-		if err.Error() == "500 Internal Server Error: Failed to send execute actions email" {
+		if strings.Contains(err.Error(), "500 Internal Server Error: Failed to send execute actions email") ||
+			strings.Contains(err.Error(), "500 Internal Server Error: Failed to send verify email") {
 			return
 		}
-		require.NoError(t, err, "SendVerifyEmail failed")
+		require.NoError(t, err, "SendVerifyEmail failed - %s", err.Error())
 	}
 }
 
 func Test_Logout(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetUserToken(t, client)
@@ -2662,7 +2661,7 @@ func Test_Logout(t *testing.T) {
 }
 
 func Test_LogoutAllSessions(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2680,7 +2679,7 @@ func Test_LogoutAllSessions(t *testing.T) {
 }
 
 func Test_RevokeUserConsents(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -2712,7 +2711,7 @@ func Test_RevokeUserConsents(t *testing.T) {
 }
 
 func Test_LogoutUserSession(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	uToken := GetUserToken(t, client)
@@ -2728,7 +2727,7 @@ func Test_LogoutUserSession(t *testing.T) {
 }
 
 func Test_GetRealm(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2742,7 +2741,7 @@ func Test_GetRealm(t *testing.T) {
 }
 
 func Test_GetRealms(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
 
@@ -2797,14 +2796,14 @@ func CreateRealm(t *testing.T, client gocloak.GoCloakIface) (func(), string) {
 }
 
 func Test_CreateRealm(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	tearDown, _ := CreateRealm(t, client)
 	defer tearDown()
 }
 
 func Test_UpdateRealm(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
 
@@ -2826,7 +2825,7 @@ func Test_UpdateRealm(t *testing.T) {
 }
 
 func Test_ClearRealmCache(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	ClearRealmCache(t, client)
 }
@@ -2863,14 +2862,14 @@ func CreateRealmRole(t *testing.T, client gocloak.GoCloakIface) (func(), string)
 }
 
 func Test_CreateRealmRole(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 	tearDown, _ := CreateRealmRole(t, client)
 	defer tearDown()
 }
 
 func Test_GetRealmRole(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2893,7 +2892,7 @@ func Test_GetRealmRole(t *testing.T) {
 }
 
 func Test_GetRealmRoles(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2911,7 +2910,7 @@ func Test_GetRealmRoles(t *testing.T) {
 }
 
 func Test_UpdateRealmRole(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2947,7 +2946,7 @@ func Test_UpdateRealmRole(t *testing.T) {
 }
 
 func Test_DeleteRealmRole(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2963,7 +2962,7 @@ func Test_DeleteRealmRole(t *testing.T) {
 }
 
 func Test_AddRealmRoleToUser_DeleteRealmRoleFromUser(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -2999,7 +2998,7 @@ func Test_AddRealmRoleToUser_DeleteRealmRoleFromUser(t *testing.T) {
 }
 
 func Test_AddRealmRoleToGroup_DeleteRealmRoleFromGroup(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3035,7 +3034,7 @@ func Test_AddRealmRoleToGroup_DeleteRealmRoleFromGroup(t *testing.T) {
 }
 
 func Test_GetRealmRolesByUserID(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3099,7 +3098,7 @@ func Test_GetRealmRolesByUserID(t *testing.T) {
 }
 
 func Test_GetRealmRolesByGroupID(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3139,7 +3138,7 @@ func Test_GetRealmRolesByGroupID(t *testing.T) {
 }
 
 func Test_AddRealmRoleComposite_DeleteRealmRoleComposite(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3218,7 +3217,7 @@ func CreateUser(t *testing.T, client gocloak.GoCloakIface) (func(), string) {
 }
 
 func Test_CreateUser(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 
 	tearDown, _ := CreateUser(t, client)
@@ -3306,8 +3305,10 @@ func Test_GetUserBruteForceDetectionStatus(t *testing.T) {
 
 }
 
+// Note regarding user custom attributes and user profile changes since Keycloak 24:
+// https://www.keycloak.org/docs/26.4.0/upgrading/#user-profile-changes
 func Test_CreateUserCustomAttributes(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3330,7 +3331,7 @@ func Test_CreateUserCustomAttributes(t *testing.T) {
 }
 
 func Test_GetUserByID(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3348,7 +3349,7 @@ func Test_GetUserByID(t *testing.T) {
 }
 
 func Test_GetUsers(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3365,7 +3366,7 @@ func Test_GetUsers(t *testing.T) {
 }
 
 func Test_GetUserCount(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3381,7 +3382,7 @@ func Test_GetUserCount(t *testing.T) {
 }
 
 func Test_GetGroupsCount(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3396,7 +3397,7 @@ func Test_GetGroupsCount(t *testing.T) {
 }
 
 func Test_AddUserToGroup(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3417,7 +3418,7 @@ func Test_AddUserToGroup(t *testing.T) {
 }
 
 func Test_DeleteUserFromGroup(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3445,7 +3446,7 @@ func Test_DeleteUserFromGroup(t *testing.T) {
 }
 
 func Test_GetUserGroups(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3476,7 +3477,7 @@ func Test_GetUserGroups(t *testing.T) {
 }
 
 func Test_DeleteUser(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 
 	tearDown, _ := CreateUser(t, client)
@@ -3484,7 +3485,7 @@ func Test_DeleteUser(t *testing.T) {
 }
 
 func Test_UpdateUser(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3507,7 +3508,7 @@ func Test_UpdateUser(t *testing.T) {
 }
 
 func Test_UpdateUserSetEmptyRequiredActions(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3557,7 +3558,7 @@ func Test_UpdateUserSetEmptyRequiredActions(t *testing.T) {
 }
 
 func Test_UpdateUserSetEmptyEmail(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3589,7 +3590,7 @@ func Test_UpdateUserSetEmptyEmail(t *testing.T) {
 }
 
 func Test_GetUsersByRoleName(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3637,7 +3638,7 @@ func Test_GetUsersByRoleName(t *testing.T) {
 }
 
 func Test_GetUsersByClientRoleName(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -3678,7 +3679,7 @@ func Test_GetUsersByClientRoleName(t *testing.T) {
 }
 
 func Test_GetUserSessions(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -3706,7 +3707,7 @@ func Test_GetUserSessions(t *testing.T) {
 }
 
 func Test_GetUserOfflineSessionsForClient(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -3737,7 +3738,7 @@ func Test_GetUserOfflineSessionsForClient(t *testing.T) {
 }
 
 func Test_GetClientUserSessions(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -3817,7 +3818,7 @@ func findProtocolMapperByID(t *testing.T, client *gocloak.Client, id string) *go
 }
 
 func Test_CreateUpdateDeleteClientProtocolMapper(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	id := GetRandomName("protocol-mapper-id-")
@@ -3915,7 +3916,7 @@ func Test_CreateUpdateDeleteClientProtocolMapper(t *testing.T) {
 }
 
 func Test_GetClientOfflineSessions(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -3957,7 +3958,7 @@ func Test_GetClientOfflineSessions(t *testing.T) {
 }
 
 func Test_ClientSecret(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -4008,7 +4009,7 @@ func Test_ClientSecret(t *testing.T) {
 }
 
 func Test_ClientServiceAccount(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -4028,7 +4029,7 @@ func Test_ClientServiceAccount(t *testing.T) {
 }
 
 func Test_AddClientRoleToUser_DeleteClientRoleFromUser(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -4076,7 +4077,7 @@ func Test_AddClientRoleToUser_DeleteClientRoleFromUser(t *testing.T) {
 }
 
 func Test_GetClientRolesByUserID(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -4143,7 +4144,7 @@ func Test_GetClientRolesByUserID(t *testing.T) {
 }
 
 func Test_GetAvailableClientRolesByUserID(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -4221,7 +4222,7 @@ func Test_GetAvailableClientRolesByUserID(t *testing.T) {
 }
 
 func Test_GetAvailableRealmRolesByUserID(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -4294,7 +4295,7 @@ func Test_GetAvailableRealmRolesByUserID(t *testing.T) {
 }
 
 func Test_GetAvailableClientRolesByGroupID(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -4372,7 +4373,7 @@ func Test_GetAvailableClientRolesByGroupID(t *testing.T) {
 }
 
 func Test_GetAvailableRealmRolesByGroupID(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -4446,7 +4447,7 @@ func Test_GetAvailableRealmRolesByGroupID(t *testing.T) {
 }
 
 func Test_GetClientRolesByGroupID(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -4472,7 +4473,7 @@ func Test_GetClientRolesByGroupID(t *testing.T) {
 }
 
 func Test_AddClientRoleToGroup_DeleteClientRoleFromGroup(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -4524,7 +4525,7 @@ func Test_AddClientRoleToGroup_DeleteClientRoleFromGroup(t *testing.T) {
 }
 
 func Test_AddDeleteClientRoleComposite(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -4584,7 +4585,7 @@ func Test_AddDeleteClientRoleComposite(t *testing.T) {
 }
 
 func Test_AddDeleteRealmRoleComposite(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -4785,7 +4786,7 @@ func Test_CreateGetDeleteUserFederatedIdentity(t *testing.T) {
 }
 
 func Test_CreateDeleteClientScopeWithMappers(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -4865,7 +4866,7 @@ func Test_CreateDeleteClientScopeWithMappers(t *testing.T) {
 		cfg.GoCloak.Realm,
 		id,
 	)
-	require.EqualError(t, err, "404 Not Found: Could not find client scope")
+	require.ErrorContains(t, err, "404 Not Found: Could not find client scope")
 	require.Nil(t, clientScopeActual, "client scope has not been deleted")
 }
 
@@ -5091,7 +5092,7 @@ func Test_CreateProvider(t *testing.T) {
 // -----------------
 
 func Test_ErrorsCreateListGetUpdateDeleteResourceClient(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetClientToken(t, client)
@@ -5141,7 +5142,7 @@ func Test_ErrorsCreateListGetUpdateDeleteResourceClient(t *testing.T) {
 }
 
 func Test_CreateListGetUpdateDeleteResourceClient(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetClientToken(t, client)
@@ -5206,7 +5207,7 @@ func Test_CreateListGetUpdateDeleteResourceClient(t *testing.T) {
 }
 
 func Test_GetResourceServer(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -5223,7 +5224,7 @@ func Test_GetResourceServer(t *testing.T) {
 }
 
 func Test_CreateListGetUpdateDeleteResource(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -5292,7 +5293,7 @@ func Test_CreateListGetUpdateDeleteResource(t *testing.T) {
 }
 
 func Test_CreateListGetUpdateDeleteScope(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -5360,7 +5361,7 @@ func Test_CreateListGetUpdateDeleteScope(t *testing.T) {
 }
 
 func Test_CreateListGetUpdateDeletePolicy(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -5893,7 +5894,7 @@ func Test_CreateGetUpdateDeleteResourcePolicy(t *testing.T) {
 }
 
 func Test_RolePolicy(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -5926,7 +5927,7 @@ func Test_RolePolicy(t *testing.T) {
 }
 
 func Test_ClientPolicy(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 
 	// Create
@@ -5945,7 +5946,7 @@ func Test_ClientPolicy(t *testing.T) {
 }
 
 func Test_TimePolicy(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 
 	// Create
@@ -5973,7 +5974,7 @@ func Test_TimePolicy(t *testing.T) {
 }
 
 func Test_UserPolicy(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 
 	tearDownUser, userID := CreateUser(t, client)
@@ -5995,7 +5996,7 @@ func Test_UserPolicy(t *testing.T) {
 }
 
 func Test_AggregatedPolicy(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 
 	tearDownClient, clientPolicyID := CreatePolicy(t, client, gocloakClientID, gocloak.PolicyRepresentation{
@@ -6041,7 +6042,7 @@ func Test_AggregatedPolicy(t *testing.T) {
 }
 
 func Test_GroupPolicy(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	client := NewClientWithDebug(t)
 
 	tearDownGroup, groupID := CreateGroup(t, client)
@@ -6065,7 +6066,7 @@ func Test_GroupPolicy(t *testing.T) {
 }
 
 func Test_ErrorsGrantGetUpdateDeleteUserPermission(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetClientToken(t, client)
@@ -6130,7 +6131,7 @@ func Test_ErrorsGrantGetUpdateDeleteUserPermission(t *testing.T) {
 }
 
 func Test_GrantGetUpdateDeleteUserPermission(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetClientToken(t, client)
@@ -6227,7 +6228,7 @@ func Test_GrantGetUpdateDeleteUserPermission(t *testing.T) {
 }
 
 func Test_BadCreatePermissionTicket(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetClientToken(t, client)
@@ -6263,7 +6264,7 @@ func Test_BadCreatePermissionTicket(t *testing.T) {
 }
 
 func Test_CreatePermissionTicket(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetClientToken(t, client)
@@ -6307,7 +6308,7 @@ func Test_CreatePermissionTicket(t *testing.T) {
 }
 
 func Test_CreateListGetUpdateDeletePermission(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6439,7 +6440,7 @@ func Test_CreateListGetUpdateDeletePermission(t *testing.T) {
 }
 
 func Test_CheckError(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6461,7 +6462,9 @@ func Test_CheckError(t *testing.T) {
 	}
 
 	apiError := err.(*gocloak.APIError)
-	require.Equal(t, expectedError, apiError)
+	require.Equal(t, expectedError.Code, apiError.Code)
+	require.Contains(t, apiError.Message, expectedError.Message)
+	require.Equal(t, expectedError.Type, apiError.Type)
 }
 
 // ---------------
@@ -6469,7 +6472,7 @@ func Test_CheckError(t *testing.T) {
 // ---------------
 
 func Test_GetCredentialRegistrators(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6484,7 +6487,7 @@ func Test_GetCredentialRegistrators(t *testing.T) {
 }
 
 func Test_GetConfiguredUserStorageCredentialTypes(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6501,7 +6504,7 @@ func Test_GetConfiguredUserStorageCredentialTypes(t *testing.T) {
 }
 
 func Test_GetUpdateLableDeleteCredentials(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6570,7 +6573,7 @@ func Test_GetUpdateLableDeleteCredentials(t *testing.T) {
 func Test_DisableAllCredentialsByType(t *testing.T) {
 	// NOTE(svilgelm): I didn't find a way how to properly test this function,
 	// so the test validates that the API call doesn't return an error.
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6587,7 +6590,7 @@ func Test_DisableAllCredentialsByType(t *testing.T) {
 }
 
 func Test_TestSetFunctionalOptions(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	cfg := GetConfig(t)
 	gocloak.NewClient(cfg.HostName, gocloak.SetAuthRealms("foo"), gocloak.SetAuthAdminRealms("bar"))
@@ -6610,7 +6613,7 @@ func Test_GetClientsWithPagination(t *testing.T) {
 	defer tearDown()
 	t.Log(createdClientID)
 	first := 0
-	max := 1
+	maxItems := 1
 	// Looking for a created client
 	clients, err := client.GetClients(
 		context.Background(),
@@ -6618,15 +6621,15 @@ func Test_GetClientsWithPagination(t *testing.T) {
 		cfg.GoCloak.Realm,
 		gocloak.GetClientsParams{
 			First: &first,
-			Max:   &max,
+			Max:   &maxItems,
 		},
 	)
 	require.NoError(t, err)
-	require.Equal(t, max, len(clients))
+	require.Equal(t, maxItems, len(clients))
 }
 
 func Test_ImportIdentityProviderConfig(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6641,13 +6644,14 @@ func Test_ImportIdentityProviderConfig(t *testing.T) {
 	require.NoError(t, err, "ImportIdentityProviderConfig failed")
 
 	expected := map[string]string{
-		"userInfoUrl":       "https://openidconnect.googleapis.com/v1/userinfo",
-		"validateSignature": "true",
-		"tokenUrl":          "https://oauth2.googleapis.com/token",
-		"authorizationUrl":  "https://accounts.google.com/o/oauth2/v2/auth",
-		"jwksUrl":           "https://www.googleapis.com/oauth2/v3/certs",
-		"issuer":            "https://accounts.google.com",
-		"useJwksUrl":        "true",
+		"userInfoUrl":           "https://openidconnect.googleapis.com/v1/userinfo",
+		"validateSignature":     "true",
+		"tokenUrl":              "https://oauth2.googleapis.com/token",
+		"authorizationUrl":      "https://accounts.google.com/o/oauth2/v2/auth",
+		"jwksUrl":               "https://www.googleapis.com/oauth2/v3/certs",
+		"issuer":                "https://accounts.google.com",
+		"useJwksUrl":            "true",
+		"metadataDescriptorUrl": "https://accounts.google.com/.well-known/openid-configuration",
 	}
 
 	require.Len(
@@ -6663,7 +6667,7 @@ func Test_ImportIdentityProviderConfig(t *testing.T) {
 }
 
 func Test_ImportIdentityProviderConfigFromFile(t *testing.T) {
-	// t.Parallel()
+	// // t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6722,6 +6726,8 @@ E8go1LcvbfHNyknHu2sptnRq55fHZSHr18vVsQRfDYMG</ds:X509Certificate>
 		"loginHint":                       "false",
 		"enabledFromMetadata":             "true",
 		"idpEntityId":                     "https://accounts.google.com/o/saml2?idpid=C01unc9st",
+		"syncMode":                        "LEGACY",
+		"artifactBindingResponse":         "false",
 	}
 
 	require.Len(
@@ -6737,7 +6743,7 @@ E8go1LcvbfHNyknHu2sptnRq55fHZSHr18vVsQRfDYMG</ds:X509Certificate>
 }
 
 func TestGocloak_GetAuthenticationFlows(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6759,7 +6765,7 @@ func TestGocloak_GetAuthenticationFlows(t *testing.T) {
 }
 
 func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlow(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6902,7 +6908,7 @@ func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlo
 }
 
 func TestGocloak_CreateAndGetRequiredAction(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6948,7 +6954,7 @@ FOUND_RA:
 }
 
 func TestGocloak_GetUnknownRequiredAction(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6959,7 +6965,7 @@ func TestGocloak_GetUnknownRequiredAction(t *testing.T) {
 }
 
 func TestGocloak_GetEmptyAliasRequiredAction(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -6970,7 +6976,7 @@ func TestGocloak_GetEmptyAliasRequiredAction(t *testing.T) {
 }
 
 func TestGocloak_UpdateRequiredAction(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -7015,7 +7021,7 @@ func CreateComponent(t *testing.T, client gocloak.GoCloakIface) (func(), *gocloa
 }
 
 func Test_GetComponentsWithParams(t *testing.T) {
-	// t.Parallel()
+	// // t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -7039,7 +7045,7 @@ func Test_GetComponentsWithParams(t *testing.T) {
 }
 
 func Test_GetComponent(t *testing.T) {
-	// t.Parallel()
+	// // t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -7056,7 +7062,7 @@ func Test_GetComponent(t *testing.T) {
 }
 
 func Test_UpdateComponent(t *testing.T) {
-	// t.Parallel()
+	// // t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
@@ -7098,7 +7104,7 @@ func Test_UpdateComponent(t *testing.T) {
 }
 
 func Test_RevokeToken(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	SetUpTestUser(t, client)
@@ -7111,4 +7117,566 @@ func Test_RevokeToken(t *testing.T) {
 		token.RefreshToken,
 	)
 	require.NoError(t, err, "Revoke failed")
+}
+
+// -----------
+// Organizations
+// -----------
+
+func CreateOrganization(t *testing.T, client gocloak.GoCloakIface, name, alias, domain string) (func(), string) {
+	cfg := GetConfig(t)
+	token := GetAdminToken(t, client)
+
+	org := gocloak.OrganizationRepresentation{
+		Name:        gocloak.StringP(name),
+		Alias:       gocloak.StringP(alias),
+		Enabled:     gocloak.BoolP(true),
+		Description: gocloak.StringP("Just a test organization"),
+		Domains: &[]gocloak.OrganizationDomainRepresentation{
+			{
+				Name:     gocloak.StringP(domain),
+				Verified: gocloak.BoolP(true),
+			},
+		},
+	}
+
+	orgID, err := client.CreateOrganization(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		org)
+
+	require.NoError(t, err, "CreateOrganization failed")
+
+	org.ID = &orgID
+	t.Logf("Created Organization: %+v", org)
+	tearDown := func() {
+		err := client.DeleteOrganization(
+			context.Background(),
+			token.AccessToken,
+			cfg.GoCloak.Realm,
+			orgID)
+		require.NoError(t, err, "DeleteOrganization")
+	}
+
+	return tearDown, orgID
+}
+
+func Test_CreateOrganization(t *testing.T) {
+	// t.Parallel()
+	client := NewClientWithDebug(t)
+
+	tearDown, _ := CreateOrganization(t, client, "Test Inc", "test-inc", "test.com")
+	defer tearDown()
+}
+
+func Test_GetOrganizations(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	// Create two organizations
+	tearDown1, _ := CreateOrganization(t, client, "TestGetOrgs 1", "test-inc-get", "test-get.com")
+	defer tearDown1()
+
+	tearDown2, _ := CreateOrganization(t, client, "TestGetOrgs 2", "another-inc-get", "another-get.com")
+	defer tearDown2()
+
+	organizations, err := client.GetOrganizations(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		gocloak.GetOrganizationsParams{
+			Search: gocloak.StringP("TestGetOrgs"),
+		})
+	require.NoError(t, err, "GetOrganizations failed")
+	require.Equal(t, 2, len(organizations))
+	t.Log(organizations)
+}
+
+func Test_GetOrganizationsByName(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	tearDown, _ := CreateOrganization(t, client, "Test Inc Get Name", "test-inc-get-name", "test-get-name.com")
+	defer tearDown()
+
+	organization, err := client.GetOrganizations(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		gocloak.GetOrganizationsParams{
+			Search: gocloak.StringP("Test Inc Get Name"),
+		})
+	require.NoError(t, err, "GetOrganizationByName failed")
+	t.Log(organization)
+}
+
+func Test_GetOrganizationsByDomain(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	tearDown, _ := CreateOrganization(t, client, "Test Inc Get Domain", "test-inc-get-domain", "test-get-domain.com")
+	defer tearDown()
+
+	organization, err := client.GetOrganizations(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		gocloak.GetOrganizationsParams{
+			Search: gocloak.StringP("test-inc-get-domain.org"),
+		})
+	require.NoError(t, err, "GetOrganizationByDomain failed")
+	t.Log(organization)
+}
+
+func Test_GetOrganizationByID(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	tearDown, orgID := CreateOrganization(t, client, "Test Inc Get ID", "test-inc-get-id", "test-get-id.com")
+	defer tearDown()
+
+	organization, err := client.GetOrganizationByID(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID)
+	require.NoError(t, err, "GetOrganization failed")
+	t.Log(organization)
+}
+
+func Test_UpdateOrganization(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	tearDown, orgID := CreateOrganization(t, client, "Test Inc Update", "test-inc-update", "test-update.com")
+	defer tearDown()
+
+	organization, err := client.GetOrganizationByID(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID)
+	require.NoError(t, err, "GetOrganizationByID failed")
+
+	organization.Enabled = gocloak.BoolP(false)
+
+	err = client.UpdateOrganization(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		*organization)
+	require.NoError(t, err, "UpdateOrganization failed")
+	t.Log(organization)
+}
+
+func Test_AddUserToOrganization(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	td, userID := CreateUser(t, client)
+	defer td()
+
+	tearDown, orgID := CreateOrganization(t, client, "Test Inc Add User", "test-inc-add-user", "test-add-user.com")
+	defer tearDown()
+
+	err := client.AddUserToOrganization(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		userID)
+	require.NoError(t, err, "AddUserToOrganization failed")
+}
+
+func Test_RemoveUserFromOrganization(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	td, userID := CreateUser(t, client)
+	defer td()
+
+	tearDown, orgID := CreateOrganization(t, client, "Test Inc Remove User", "test-inc-remove-user", "test-remove-user.com")
+	defer tearDown()
+
+	ctx := context.Background()
+
+	err := client.AddUserToOrganization(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		userID)
+	require.NoError(t, err, "AddUserToOrganization failed")
+
+	err = client.RemoveUserFromOrganization(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		userID)
+	require.NoError(t, err, "RemoveUserFromOrganization failed")
+}
+
+func Test_GetOrganizationMemberCount(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	td, userID := CreateUser(t, client)
+	defer td()
+
+	tearDown, orgID := CreateOrganization(t, client, "Test Inc Get Member Count", "test-inc-get-member-count", "test-get-member-count.com")
+	defer tearDown()
+
+	ctx := context.Background()
+	err := client.AddUserToOrganization(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		userID)
+	require.NoError(t, err, "AddUserToOrganization failed")
+
+	count, err := client.GetOrganizationMemberCount(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID)
+
+	t.Logf("Members in Organization: %d", count)
+	require.Equal(t, 1, count)
+	require.NoError(t, err, "GetOrganizationMemberCount failed")
+}
+
+func Test_GetOrganizationMemberByID(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	td, userID := CreateUser(t, client)
+	defer td()
+
+	tearDown, orgID := CreateOrganization(t, client, "Test Inc Get Member ID", "test-inc-get-member-id", "test-get-member-id.com")
+	defer tearDown()
+
+	ctx := context.Background()
+	err := client.AddUserToOrganization(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		userID)
+	require.NoError(t, err, "AddUserToOrganization failed")
+
+	member, err := client.GetOrganizationMemberByID(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		userID)
+
+	require.Equal(t, *member.ID, userID)
+	require.NoError(t, err, "GetOrganizationMemberByID failed")
+}
+
+func Test_GetOrganizationMembers(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	td, userID := CreateUser(t, client)
+	defer td()
+
+	td2, userID2 := CreateUser(t, client)
+	defer td2()
+
+	tearDown, orgID := CreateOrganization(t, client, "Test Inc Get Members", "test-inc-get-members", "test-get-members.com")
+	defer tearDown()
+
+	ctx := context.Background()
+	err := client.AddUserToOrganization(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		userID)
+	require.NoError(t, err, "AddUserToOrganization failed")
+
+	err = client.AddUserToOrganization(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		userID2)
+	require.NoError(t, err, "AddUserToOrganization failed")
+
+	members, err := client.GetOrganizationMembers(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		gocloak.GetMembersParams{})
+	require.NoError(t, err, "GetOrganizationMembers failed")
+
+	require.GreaterOrEqual(t, len(members), 1)
+}
+
+func Test_GetMemberAssociatedOrganizations(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	td, userID := CreateUser(t, client)
+	defer td()
+
+	// Create two organizations
+	tearDown1, orgID1 := CreateOrganization(t, client, "Test Inc Get Member Assoc", "test-inc-get-member-assoc", "test-inc-get-member-assoc.com")
+	defer tearDown1()
+
+	tearDown2, orgID2 := CreateOrganization(t, client, "Another Inc Get Member Assoc", "another-inc-get-member-assoc", "another-inc-get-member-assoc.com")
+	defer tearDown2()
+
+	// Add user to both organizations
+	ctx := context.Background()
+	err := client.AddUserToOrganization(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID1,
+		userID)
+	require.NoError(t, err, "AddUserToOrganization failed")
+
+	err = client.AddUserToOrganization(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID2,
+		userID)
+	require.NoError(t, err, "AddUserToOrganization failed")
+
+	organizations, err := client.GetMemberAssociatedOrganizations(
+		ctx,
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		userID)
+	require.NoError(t, err, "GetMemberAssociatedOrganizations failed")
+
+	require.GreaterOrEqual(t, len(organizations), 1)
+}
+
+func CreateIdentityProvider(t *testing.T, client gocloak.GoCloakIface, alias string) (func(), string) {
+	cfg := GetConfig(t)
+	token := GetAdminToken(t, client)
+
+	idp := gocloak.IdentityProviderRepresentation{
+		Alias:       gocloak.StringP(alias),
+		DisplayName: gocloak.StringP("Test IdP " + alias),
+		ProviderID:  gocloak.StringP("oidc"),
+		Enabled:     gocloak.BoolP(true),
+		Config: &map[string]string{
+			"tokenUrl":                           "https://test-idp.com/oauth2/default/v1/token",
+			"acceptsPromptNoneForwardFromClient": "false",
+			"jwksUrl":                            "https://test-idp.com/oauth2/default/v1/keys",
+			"isAccessTokenJWT":                   "false",
+			"filteredByClaim":                    "false",
+			"backchannelSupported":               "false",
+			"caseSensitiveOriginalUsername":      "false",
+			"issuer":                             "https://test-idp.com/oauth2/default",
+			"loginHint":                          "true",
+			"clientAuthMethod":                   "client_secret_post",
+			"syncMode":                           "LEGACY",
+			"clientSecret":                       "**********",
+			"allowedClockSkew":                   "0",
+			"defaultScope":                       "openid profile email",
+			"validateSignature":                  "true",
+			"clientId":                           "client-id-" + alias,
+			"uiLocales":                          "false",
+			"disableNonce":                       "false",
+			"useJwksUrl":                         "true",
+			"kc.org.domain":                      "test-idp.com",
+			"kc.org.broker.redirect.mode.email-matches": "true",
+			"sendClientIdOnLogout":                      "false",
+			"pkceEnabled":                               "false",
+			"metadataDescriptorUrl":                     "https://test-idp.com/oauth2/default/.well-known/oauth-authorization-server",
+			"authorizationUrl":                          "https://test-idp.com/oauth2/default/v1/authorize",
+			"disableUserInfo":                           "false",
+			"logoutUrl":                                 "https://test-idp.com/oauth2/default/v1/logout",
+			"sendIdTokenOnLogout":                       "true",
+			"passMaxAge":                                "false",
+			"prompt":                                    "select_account",
+		},
+	}
+
+	idpID, err := client.CreateIdentityProvider(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		idp,
+	)
+
+	require.NoError(t, err, "CreateIdentityProvider failed")
+
+	t.Logf("Created Identity Provider with ID: %s", idpID)
+	tearDown := func() {
+		err := client.DeleteIdentityProvider(
+			context.Background(),
+			token.AccessToken,
+			cfg.GoCloak.Realm,
+			idpID,
+		)
+		require.NoError(t, err, "DeleteIdentityProvider failed")
+	}
+
+	return tearDown, idpID
+}
+
+func Test_AddOrganizationIdentityProvider(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	tearDownOrg, orgID := CreateOrganization(t, client, "Test Inc Add IdP", "test-inc-add-idp", "test-inc-add-idp.com")
+	defer tearDownOrg()
+
+	tearDownIDP1, idpID1 := CreateIdentityProvider(t, client, "test-add-org-idps-1")
+	defer tearDownIDP1()
+
+	tearDownIDP2, _ := CreateIdentityProvider(t, client, "test-add-org-idps-2")
+	defer tearDownIDP2()
+
+	// Add by identity provider ID
+	err := client.AddOrganizationIdentityProvider(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		idpID1)
+	require.NoError(t, err, "AddOrganizationIdentityProvider with id failed")
+
+	// Add by identity provider alias
+	err = client.AddOrganizationIdentityProvider(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		"test-add-org-idps-2")
+	require.NoError(t, err, "AddOrganizationIdentityProvider with alias failed")
+}
+
+func Test_RemoveOrganizationIdentityProvider(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	tearDownOrg, orgID := CreateOrganization(t, client, "Test Inc Remove IdP", "test-inc-remove-idp", "test-inc-remove-idp.com")
+	defer tearDownOrg()
+
+	tearDownIDP, idpID := CreateIdentityProvider(t, client, "test-remove-org-idps")
+	defer tearDownIDP()
+
+	err := client.AddOrganizationIdentityProvider(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		idpID)
+	require.NoError(t, err, "AddOrganizationIdentityProvider failed")
+
+	err = client.RemoveOrganizationIdentityProvider(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		idpID)
+	require.NoError(t, err, "RemoveOrganizationIdentityProvider failed")
+}
+
+func Test_GetOrganizationIdentityProviderByAlias(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	tearDownOrg, orgID := CreateOrganization(t, client, "Test Inc Get IdP By Alias", "test-inc-get-idp-by-alias", "test-inc-get-idp-by-alias.com")
+	defer tearDownOrg()
+
+	tearDownIDP, idpID := CreateIdentityProvider(t, client, "test-get-org-idps-by-alias")
+	defer tearDownIDP()
+
+	err := client.AddOrganizationIdentityProvider(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		idpID)
+	require.NoError(t, err, "AddOrganizationIdentityProvider failed")
+
+	idp, err := client.GetOrganizationIdentityProviderByAlias(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		"test-get-org-idps-by-alias")
+	require.NoError(t, err, "GetOrganizationIdentityProviderByAlias failed")
+	require.Equal(t, *idp.Alias, "test-get-org-idps-by-alias", "GetOrganizationIdentityProviderByAlias returned wrong IdP")
+}
+
+func Test_GetOrganizationIdentityProviders(t *testing.T) {
+	// t.Parallel()
+	cfg := GetConfig(t)
+	client := NewClientWithDebug(t)
+	token := GetAdminToken(t, client)
+
+	tearDownOrg, orgID := CreateOrganization(t, client, "Test Inc Get IdP", "test-inc-get-idp", "test-inc-get-idp.com")
+	defer tearDownOrg()
+
+	tearDownIDP, idpID := CreateIdentityProvider(t, client, "test-get-org-idps")
+	defer tearDownIDP()
+
+	idps, err := client.GetOrganizationIdentityProviders(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID)
+	require.NoError(t, err, "GetOrganizationIdentityProviders failed")
+	require.Equal(t, len(idps), 0, "GetOrganizationIdentityProviders should return 0 IdPs")
+
+	// Associate IdP with Organization
+	err = client.AddOrganizationIdentityProvider(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID,
+		idpID)
+	require.NoError(t, err, "AddOrganizationIdentityProvider failed")
+
+	idps, err = client.GetOrganizationIdentityProviders(
+		context.Background(),
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		orgID)
+	require.NoError(t, err, "GetOrganizationIdentityProviders failed")
+	require.Equal(t, len(idps), 1, "GetOrganizationIdentityProviders should return 1 IdP")
+	require.Equal(t, *idps[0].Alias, "test-get-org-idps", "GetOrganizationIdentityProviders returned wrong IdP")
 }

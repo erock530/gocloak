@@ -67,33 +67,33 @@
     "webAuthnPolicyAcceptableAaguids": [],
     "users": [
         {
-          "id": "6ead694f-bf59-495d-a475-a3b0b9be50ed",
-          "createdTimestamp": 1666175342321,
-          "username": "service-account-gocloak",
-          "enabled": true,
-          "totp": false,
-          "emailVerified": false,
-          "serviceAccountClientId": "gocloak",
-          "disableableCredentialTypes": [],
-          "requiredActions": [],
-          "realmRoles": [
-            "default-roles-gocloak"
-          ],
-          "clientRoles": {
-            "realm-management": [
-              "manage-clients",
-              "view-clients",
-              "query-clients",
-              "create-client"
+            "id": "6ead694f-bf59-495d-a475-a3b0b9be50ed",
+            "createdTimestamp": 1666175342321,
+            "username": "service-account-gocloak",
+            "enabled": true,
+            "totp": false,
+            "emailVerified": false,
+            "serviceAccountClientId": "gocloak",
+            "disableableCredentialTypes": [],
+            "requiredActions": [],
+            "realmRoles": [
+                "default-roles-gocloak"
             ],
-            "gocloak": [
-              "uma_protection"
-            ]
-          },
-          "notBefore": 0,
-          "groups": []
+            "clientRoles": {
+                "realm-management": [
+                    "manage-clients",
+                    "view-clients",
+                    "query-clients",
+                    "create-client"
+                ],
+                "gocloak": [
+                    "uma_protection"
+                ]
+            },
+            "notBefore": 0,
+            "groups": []
         }
-      ],
+    ],
     "scopeMappings": [
         {
             "clientScope": "offline_access",
@@ -1113,6 +1113,18 @@
                     ]
                 }
             }
+        ],
+        "org.keycloak.userprofile.UserProfileProvider": [
+            {
+                "id": "1aa2baa9-adbf-42ac-8879-1631e143d84b",
+                "providerId": "declarative-user-profile",
+                "subComponents": {},
+                "config": {
+                    "kc.user.profile.config": [
+                        "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255}},\"annotations\":{},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}],\"unmanagedAttributePolicy\":\"ENABLED\"}"
+                    ]
+                }
+            }
         ]
     },
     "internationalizationEnabled": false,
@@ -1699,6 +1711,6 @@
         "offlineSessionMaxLifespanEnabled": "false",
         "waitIncrementSeconds": "60"
     },
-    "keycloakVersion": "8.0.1",
-    "userManagedAccessAllowed": false
+    "userManagedAccessAllowed": false,
+    "organizationsEnabled": true
 }

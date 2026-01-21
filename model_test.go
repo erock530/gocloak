@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/Nerzal/gocloak/v13"
+	"github.com/erock530/gocloak"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -336,9 +336,129 @@ func TestStringerOmitEmpty(t *testing.T) {
 		&gocloak.RequestingPartyTokenOptions{},
 		&gocloak.RequestingPartyPermission{},
 		&gocloak.GetClientUserSessionsParams{},
+		&gocloak.GetOrganizationsParams{},
+		&gocloak.OrganizationDomainRepresentation{},
+		&gocloak.OrganizationRepresentation{},
 	}
 
 	for _, custom := range customs {
 		assert.Equal(t, "{}", custom.String())
+	}
+}
+
+func Test_IdentityProviderRepresentation_OrgDomain(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		config   map[string]string
+		expected string
+	}{
+		{
+			name: "valid domain",
+			config: map[string]string{
+				"kc.org.domain": "example.com",
+			},
+			expected: "example.com",
+		},
+		{
+			name:     "missing value",
+			config:   map[string]string{},
+			expected: "",
+		},
+		{
+			name: "nil config",
+			// config is nil
+			expected: "",
+		},
+		{
+			name: "empty string value",
+			config: map[string]string{
+				"kc.org.domain": "",
+			},
+			expected: "",
+		},
+		{
+			name: "missing key",
+			config: map[string]string{
+				"some.other.key": "value",
+			},
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			idp := gocloak.IdentityProviderRepresentation{
+				Alias:       gocloak.StringP("test-idp"),
+				DisplayName: gocloak.StringP("Test IdP"),
+				ProviderID:  gocloak.StringP("oidc"),
+				Enabled:     gocloak.BoolP(true),
+				Config:      &tt.config,
+			}
+			assert.Equal(t, tt.expected, idp.OrgDomain())
+		})
+	}
+}
+
+func Test_IdentityProviderRepresentation_RedirectModeEmailMatches(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		config   map[string]string
+		expected bool
+	}{
+		{
+			name: "true value",
+			config: map[string]string{
+				"kc.org.broker.redirect.mode.email-matches": "true",
+			},
+			expected: true,
+		},
+		{
+			name: "false value",
+			config: map[string]string{
+				"kc.org.broker.redirect.mode.email-matches": "false",
+			},
+			expected: false,
+		},
+		{
+			name:     "missing value",
+			config:   map[string]string{},
+			expected: false,
+		},
+		{
+			name: "nil config",
+			// config is nil
+			expected: false,
+		},
+		{
+			name: "invalid value",
+			config: map[string]string{
+				"kc.org.broker.redirect.mode.email-matches": "not-a-bool",
+			},
+			expected: false,
+		},
+		{
+			name: "missing key",
+			config: map[string]string{
+				"some.other.key": "true",
+			},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			idp := gocloak.IdentityProviderRepresentation{
+				Alias:       gocloak.StringP("test-idp"),
+				DisplayName: gocloak.StringP("Test IdP"),
+				ProviderID:  gocloak.StringP("oidc"),
+				Enabled:     gocloak.BoolP(true),
+				Config:      &tt.config,
+			}
+			assert.Equal(t, tt.expected, idp.RedirectModeEmailMatches())
+		})
 	}
 }
