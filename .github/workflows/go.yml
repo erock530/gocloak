@@ -12,7 +12,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25'
+          go-version: '1.24'
           cache: true
 
       - name: Run golangci-lint
@@ -48,9 +48,9 @@ jobs:
       - name: Failed Logs
         if: failure()
         run: |
-          cat test.log
+          [ -f test.log ] && cat test.log || echo "test.log not found (tests may not have run)"
           docker ps
-          docker logs keycloak
+          docker logs keycloak 2>/dev/null || true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
