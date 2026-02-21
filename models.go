@@ -601,8 +601,8 @@ type PolicyRepresentation struct {
 
 // RolePolicyRepresentation represents role based policies
 type RolePolicyRepresentation struct {
-	FetchRoles *bool             `json:"fetchRoles,omitempty"`
-	Roles *[]RoleDefinition `json:"roles,omitempty"`
+	FetchRoles *bool              `json:"fetchRoles,omitempty"`
+	Roles      *[]RoleDefinition  `json:"roles,omitempty"`
 }
 
 // JSPolicyRepresentation represents js based policies
