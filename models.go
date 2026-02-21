@@ -305,7 +305,7 @@ type GetUsersParams struct {
 // GetComponentsParams represents the optional parameters for getting components
 type GetComponentsParams struct {
 	Name         *string `json:"name,omitempty"`
-	ProviderType *string `json:"provider,omitempty"`
+	Type *string `json:"type,omitempty"`
 	ParentID     *string `json:"parent,omitempty"`
 }
 
@@ -460,6 +460,7 @@ type ProtocolMappersConfig struct {
 	AttributeNameFormat                *string `json:"attribute.nameformat,omitempty"`
 	Single                             *string `json:"single,omitempty"`
 	Script                             *string `json:"script,omitempty"`
+	UserSessionNote                    *string `json:"user.session.note,omitempty"`
 	AddOrganizationAttributes          *string `json:"addOrganizationAttributes,omitempty"`
 	AddOrganizationID                  *string `json:"addOrganizationId,omitempty"`
 }
@@ -592,6 +593,7 @@ type PolicyRepresentation struct {
 
 // RolePolicyRepresentation represents role based policies
 type RolePolicyRepresentation struct {
+	FetchRoles *bool             `json:"fetchRoles,omitempty"`
 	Roles *[]RoleDefinition `json:"roles,omitempty"`
 }
 
@@ -1163,6 +1165,7 @@ type IdentityProviderRepresentation struct {
 	ProviderID                *string            `json:"providerId,omitempty"`
 	StoreToken                *bool              `json:"storeToken,omitempty"`
 	TrustEmail                *bool              `json:"trustEmail,omitempty"`
+	HideOnLogin               *bool              `json:"hideOnLogin,omitempty"`
 }
 
 // OrgDomain returns the organization domain configured for the identity provider, or an empty string if not set
@@ -1400,6 +1403,40 @@ type EventRepresentation struct {
 	SessionID *string           `json:"sessionId,omitempty"`
 	IPAddress *string           `json:"ipAddress,omitempty"`
 	Details   map[string]string `json:"details,omitempty"`
+}
+
+// GetAdminEventsParams represents the optional parameters for getting events
+type GetAdminEventsParams struct {
+	AuthClient     *string  `json:"authClient,omitempty"`
+	AuthIpAddress  *string  `json:"authIpAddress,omitempty"`
+	AuthRealm      *string  `json:"authRealm,omitempty"`
+	AuthUser       *string  `json:"authUser,omitempty"`
+	DateFrom       *string  `json:"dateFrom,omitempty"`
+	DateTo         *string  `json:"dateTo,omitempty"`
+	First          *int32   `json:"first,omitempty"`
+	Max            *int32   `json:"max,omitempty"`
+	OperationTypes []string `json:"operationTypes,omitempty"`
+	ResourcePath   *string  `json:"resourcePath,omitempty"`
+	ResourceTypes  []string `json:"resourceTypes,omitempty"`
+}
+
+// AdminEventRepresentation is a representation of an Admin Event
+type AdminEventRepresentation struct {
+	Time           int64                                `json:"time,omitempty"`
+	OperationType  *string                              `json:"operationType,omitempty"`
+	RealmID        *string                              `json:"realmId,omitempty"`
+	ResourceType   *string                              `json:"resourceType,omitempty"`
+	ResourcePath   *string                              `json:"resourcePath,omitempty"`
+	AuthDetails    *AdminEventAuthDetailsRepresentation `json:"authDetails,omitempty"`
+	Representation *string                              `json:"representation,omitempty"`
+}
+
+// AdminEventAuthDetailsRepresentation is a representation of an Admin Event Details
+type AdminEventAuthDetailsRepresentation struct {
+	RealmID   *string `json:"realmId,omitempty"`
+	ClientID  *string `json:"clientId,omitempty"`
+	UserID    *string `json:"userId,omitempty"`
+	IPAddress *string `json:"ipAddress,omitempty"`
 }
 
 // CredentialRepresentation is a representations of the credentials

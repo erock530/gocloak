@@ -3058,6 +3058,24 @@ func (g *GoCloak) GetUserBruteForceDetectionStatus(ctx context.Context, accessTo
 	return &result, nil
 }
 
+// ClearUserBruteForce clears brute force status for a single user.
+// See: https://www.keycloak.org/docs-api/latest/rest-api/index.html#_attack_detection
+func (g *GoCloak) ClearUserBruteForce(ctx context.Context, accessToken, realm, userID string) error {
+	const errMessage = "could not clear user brute force"
+	resp, err := g.GetRequestWithBearerAuth(ctx, accessToken).
+		Delete(g.getAttackDetectionURL(realm, "users", userID))
+	return checkForError(resp, err, errMessage)
+}
+
+// ClearAllBruteForce clears brute force status for all users in the realm.
+// See: https://www.keycloak.org/docs-api/latest/rest-api/index.html#_attack_detection
+func (g *GoCloak) ClearAllBruteForce(ctx context.Context, accessToken, realm string) error {
+	const errMessage = "could not clear all brute force"
+	resp, err := g.GetRequestWithBearerAuth(ctx, accessToken).
+		Delete(g.getAttackDetectionURL(realm, "users"))
+	return checkForError(resp, err, errMessage)
+}
+
 // ------------------
 // Identity Providers
 // ------------------
@@ -4236,6 +4254,28 @@ func (g *GoCloak) GetEvents(ctx context.Context, token string, realm string, par
 		SetResult(&result).
 		SetQueryParams(queryParams).
 		Get(g.getAdminRealmURL(realm, "events"))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// GetAdminEvents returns admin events
+func (g *GoCloak) GetAdminEvents(ctx context.Context, token string, realm string, params GetAdminEventsParams) ([]*AdminEventRepresentation, error) {
+	const errMessage = "could not get admin events"
+
+	queryParams, err := GetQueryParams(params)
+	if err != nil {
+		return nil, errors.Wrap(err, errMessage)
+	}
+
+	var result []*AdminEventRepresentation
+	resp, err := g.GetRequestWithBearerAuth(ctx, token).
+		SetResult(&result).
+		SetQueryParams(queryParams).
+		Get(g.getAdminRealmURL(realm, "admin-events"))
 
 	if err := checkForError(resp, err, errMessage); err != nil {
 		return nil, err

@@ -7033,9 +7033,9 @@ func Test_GetComponentsWithParams(t *testing.T) {
 		token.AccessToken,
 		cfg.GoCloak.Realm,
 		gocloak.GetComponentsParams{
-			Name:         component.Name,
-			ProviderType: component.ProviderType,
-			ParentID:     component.ParentID,
+			Name:     component.Name,
+			Type:     component.ProviderType,
+			ParentID: component.ParentID,
 		},
 	)
 	require.NoError(t, err, "GetComponentsWithParams failed")
@@ -7084,9 +7084,9 @@ func Test_UpdateComponent(t *testing.T) {
 		token.AccessToken,
 		cfg.GoCloak.Realm,
 		gocloak.GetComponentsParams{
-			Name:         component.Name,
-			ProviderType: component.ProviderType,
-			ParentID:     component.ParentID,
+			Name:     component.Name,
+			Type:     component.ProviderType,
+			ParentID: component.ParentID,
 		},
 	)
 	require.NoError(t, err, "GetComponentWithParams after UpdateComponent failed")
