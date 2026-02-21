@@ -86,6 +86,9 @@ func GetConfig(t testing.TB) *Config {
 		if config.GoCloak.UserName == "" {
 			config.GoCloak.UserName = "test_user"
 		}
+		if hostname := os.Getenv("GOCLOAK_TEST_HOSTNAME"); hostname != "" {
+			config.HostName = hostname
+		}
 	})
 	return config
 }

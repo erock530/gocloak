@@ -42,6 +42,8 @@ jobs:
           exit 1
 
       - name: Unit Tests
+        env:
+          GOCLOAK_TEST_HOSTNAME: "http://127.0.0.1:8080"
         run: |
           go test -failfast -race -cover -coverprofile=coverage.txt -covermode=atomic -p 100 -cpu 1,2 -bench . -benchmem > test.log
           cat test.log
