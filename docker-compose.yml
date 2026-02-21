@@ -9,6 +9,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: secret
       KC_HEALTH_ENABLED: "true"
+      KC_HOSTNAME: ${KC_HOSTNAME:-localhost}
     ports:
       - "8080:8080"
       - "9000:9000"

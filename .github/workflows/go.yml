@@ -26,6 +26,8 @@ jobs:
         continue-on-error: true  # Requires OSS Index credentials (OSS_INDEX_USERNAME, OSS_INDEX_TOKEN); 401 without them
 
       - name: Start Keycloak
+        env:
+          KC_HOSTNAME: "127.0.0.1"
         run: make start-keycloak
 
       - name: Wait for Keycloak
