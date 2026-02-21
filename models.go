@@ -312,9 +312,9 @@ type GetRealmsParams struct {
 
 // GetComponentsParams represents the optional parameters for getting components
 type GetComponentsParams struct {
-	Name         *string `json:"name,omitempty"`
-	Type *string `json:"type,omitempty"`
-	ParentID     *string `json:"parent,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Type     *string `json:"type,omitempty"`
+	ParentID *string `json:"parent,omitempty"`
 }
 
 // ExecuteActionsEmail represents parameters for executing action emails
@@ -1417,7 +1417,7 @@ type EventRepresentation struct {
 // https://www.keycloak.org/docs-api/latest/rest-api/index.html#_realms_admin_resource
 type GetAdminEventsParams struct {
 	AuthClient     *string  `json:"authClient,omitempty"`
-	AuthIpAddress  *string  `json:"authIpAddress,omitempty"`
+	AuthIPAddress  *string  `json:"authIpAddress,omitempty"`
 	AuthRealm      *string  `json:"authRealm,omitempty"`
 	AuthUser       *string  `json:"authUser,omitempty"`
 	DateFrom       *string  `json:"dateFrom,omitempty"`
