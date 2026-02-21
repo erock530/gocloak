@@ -1576,9 +1576,9 @@ type GetMembersParams struct {
 	Search         *string         `json:"search,omitempty"`
 }
 
-// MembershipType represent the membership type of an organization member.
+// MembershipType represents the membership type of an organization member (e.g. "DIRECT", "INDIRECT").
 // v26: https://www.keycloak.org/docs-api/latest/rest-api/index.html#MembershipType
-type MembershipType struct{}
+type MembershipType string
 
 // MemberRepresentation represents a member of an organization
 // v26: https://www.keycloak.org/docs-api/latest/rest-api/index.html#MemberRepresentation
