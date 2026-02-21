@@ -250,7 +250,8 @@ type ActiveKeys struct {
 	AES   *string `json:"AES,omitempty"`
 }
 
-// Key is a key
+// Key is a key (KeyMetadataRepresentation)
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#KeyMetadataRepresentation
 type Key struct {
 	ProviderID       *string `json:"providerId,omitempty"`
 	ProviderPriority *int    `json:"providerPriority,omitempty"`
@@ -260,6 +261,8 @@ type Key struct {
 	Algorithm        *string `json:"algorithm,omitempty"`
 	PublicKey        *string `json:"publicKey,omitempty"`
 	Certificate      *string `json:"certificate,omitempty"`
+	Use              *string `json:"use,omitempty"`
+	ValidTo          *int64  `json:"validTo,omitempty"`
 }
 
 // Attributes holds Attributes
@@ -300,6 +303,11 @@ type GetUsersParams struct {
 	Q                   *string `json:"q,omitempty"`
 	Search              *string `json:"search,omitempty"`
 	Username            *string `json:"username,omitempty"`
+}
+
+// GetRealmsParams represents the optional parameters for getting realms
+type GetRealmsParams struct {
+	BriefRepresentation *bool `json:"briefRepresentation,string,omitempty"`
 }
 
 // GetComponentsParams represents the optional parameters for getting components
@@ -1405,7 +1413,8 @@ type EventRepresentation struct {
 	Details   map[string]string `json:"details,omitempty"`
 }
 
-// GetAdminEventsParams represents the optional parameters for getting events
+// GetAdminEventsParams represents the optional parameters for getting admin events
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#_realms_admin_resource
 type GetAdminEventsParams struct {
 	AuthClient     *string  `json:"authClient,omitempty"`
 	AuthIpAddress  *string  `json:"authIpAddress,omitempty"`
@@ -1413,6 +1422,7 @@ type GetAdminEventsParams struct {
 	AuthUser       *string  `json:"authUser,omitempty"`
 	DateFrom       *string  `json:"dateFrom,omitempty"`
 	DateTo         *string  `json:"dateTo,omitempty"`
+	Direction      *string  `json:"direction,omitempty"` // "asc" or "desc" for sort order
 	First          *int32   `json:"first,omitempty"`
 	Max            *int32   `json:"max,omitempty"`
 	OperationTypes []string `json:"operationTypes,omitempty"`
@@ -1468,6 +1478,48 @@ type CredentialRepresentation struct {
 	UserLabel      *string `json:"userLabel,omitempty"`
 }
 
+// CertificateRepresentation represents a certificate for client or identity provider
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#CertificateRepresentation
+type CertificateRepresentation struct {
+	PrivateKey  *string `json:"privateKey,omitempty"`
+	PublicKey   *string `json:"publicKey,omitempty"`
+	Certificate *string `json:"certificate,omitempty"`
+	Kid         *string `json:"kid,omitempty"`
+	Jwks        *string `json:"jwks,omitempty"`
+}
+
+// ClientInitialAccessCreatePresentation is used to create a new initial access token
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#ClientInitialAccessCreatePresentation
+type ClientInitialAccessCreatePresentation struct {
+	Expiration *int      `json:"expiration,omitempty"`
+	Count      *int      `json:"count,omitempty"`
+	WebOrigins *[]string `json:"webOrigins,omitempty"`
+}
+
+// ClientInitialAccessPresentation represents an initial access token
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#ClientInitialAccessPresentation
+type ClientInitialAccessPresentation struct {
+	ID              *string `json:"id,omitempty"`
+	Token           *string `json:"token,omitempty"`
+	Timestamp       *int64  `json:"timestamp,omitempty"`
+	Expiration      *int64  `json:"expiration,omitempty"`
+	Count           *int    `json:"count,omitempty"`
+	RemainingCount  *int    `json:"remainingCount,omitempty"`
+}
+
+// KeyStoreConfigImport represents configuration for keystore import/export
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#KeyStoreConfig
+type KeyStoreConfigImport struct {
+	RealmCertificate *bool   `json:"realmCertificate,omitempty"`
+	StorePassword    *string `json:"storePassword,omitempty"`
+	KeyPassword      *string `json:"keyPassword,omitempty"`
+	KeyAlias         *string `json:"keyAlias,omitempty"`
+	RealmAlias       *string `json:"realmAlias,omitempty"`
+	Format           *string `json:"format,omitempty"`
+	KeySize          *int    `json:"keySize,omitempty"`
+	Validity         *int    `json:"validity,omitempty"`
+}
+
 // BruteForceStatus is a representation of realm user regarding brute force attack
 type BruteForceStatus struct {
 	NumFailures   *int    `json:"numFailures,omitempty"`
@@ -1520,7 +1572,7 @@ type GetMembersParams struct {
 	Exact          *bool           `json:"exact,string,omitempty"`
 	First          *int            `json:"first,string,omitempty"`
 	Max            *int            `json:"max,string,omitempty"`
-	MembershipType *MembershipType `json:"membershipetype,omitempty"`
+	MembershipType *MembershipType `json:"membershipType,omitempty"`
 	Search         *string         `json:"search,omitempty"`
 }
 
@@ -1533,7 +1585,7 @@ type MembershipType struct{}
 type MemberRepresentation struct {
 	User
 	// Type not defined in the Keycloak doc so I left it unexported. Help if you have more information
-	MembershipType *MembershipType `json:"membershipetype,omitempty"`
+	MembershipType *MembershipType `json:"membershipType,omitempty"`
 }
 
 // GetOrganizationsParams represents the optional parameters for getting organizations
@@ -1596,6 +1648,7 @@ func (v *Attributes) String() string                                { return pre
 func (v *Access) String() string                                    { return prettyStringStruct(v) }
 func (v *UserGroup) String() string                                 { return prettyStringStruct(v) }
 func (v *GetUsersParams) String() string                            { return prettyStringStruct(v) }
+func (v *GetRealmsParams) String() string                           { return prettyStringStruct(v) }
 func (v *GetComponentsParams) String() string                       { return prettyStringStruct(v) }
 func (v *ExecuteActionsEmail) String() string                       { return prettyStringStruct(v) }
 func (v *Group) String() string                                     { return prettyStringStruct(v) }
@@ -1658,6 +1711,10 @@ func (v *PermissionGrantResponseRepresentation) String() string     { return pre
 func (v *GetUserPermissionParams) String() string                   { return prettyStringStruct(v) }
 func (v *ResourcePolicyRepresentation) String() string              { return prettyStringStruct(v) }
 func (v *GetResourcePoliciesParams) String() string                 { return prettyStringStruct(v) }
+func (v *CertificateRepresentation) String() string                     { return prettyStringStruct(v) }
+func (v *ClientInitialAccessCreatePresentation) String() string         { return prettyStringStruct(v) }
+func (v *ClientInitialAccessPresentation) String() string               { return prettyStringStruct(v) }
+func (v *KeyStoreConfigImport) String() string                          { return prettyStringStruct(v) }
 func (v *CredentialRepresentation) String() string                  { return prettyStringStruct(v) }
 func (v *RequiredActionProviderRepresentation) String() string      { return prettyStringStruct(v) }
 func (v *BruteForceStatus) String() string                          { return prettyStringStruct(v) }

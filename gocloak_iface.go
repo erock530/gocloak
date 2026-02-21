@@ -186,6 +186,20 @@ type GoCloakIface interface {
 	GetClientServiceAccount(ctx context.Context, token, realm, idOfClient string) (*User, error)
 	// RegenerateClientSecret triggers the creation of the new client secret.
 	RegenerateClientSecret(ctx context.Context, token, realm, idOfClient string) (*CredentialRepresentation, error)
+	// GetRotatedClientSecret returns the rotated client secret if rotation is enabled
+	GetRotatedClientSecret(ctx context.Context, token, realm, idOfClient string) (*CredentialRepresentation, error)
+	// InvalidateRotatedClientSecret invalidates the rotated secret for the client
+	InvalidateRotatedClientSecret(ctx context.Context, token, realm, idOfClient string) error
+	// CreateClientInitialAccess creates a new initial access token
+	CreateClientInitialAccess(ctx context.Context, token, realm string, config ClientInitialAccessCreatePresentation) (*ClientInitialAccessPresentation, error)
+	// GetClientInitialAccess returns all initial access tokens for the realm
+	GetClientInitialAccess(ctx context.Context, token, realm string) ([]*ClientInitialAccessPresentation, error)
+	// DeleteClientInitialAccess deletes an initial access token
+	DeleteClientInitialAccess(ctx context.Context, token, realm, initialAccessID string) error
+	// GetClientCertificate returns the key info for a client certificate attribute
+	GetClientCertificate(ctx context.Context, token, realm, idOfClient, attr string) (*CertificateRepresentation, error)
+	// GenerateClientCertificate generates a new certificate with new key pair for the client
+	GenerateClientCertificate(ctx context.Context, token, realm, idOfClient, attr string) (*CertificateRepresentation, error)
 	// GetClientOfflineSessions returns offline sessions associated with the client
 	GetClientOfflineSessions(ctx context.Context, token, realm, idOfClient string, params ...GetClientUserSessionsParams) ([]*UserSessionRepresentation, error)
 	// GetClientUserSessions returns user sessions associated with the client
@@ -308,6 +322,8 @@ type GoCloakIface interface {
 	GetRealm(ctx context.Context, token, realm string) (*RealmRepresentation, error)
 	// GetRealms returns top-level representation of all realms
 	GetRealms(ctx context.Context, token string) ([]*RealmRepresentation, error)
+	// GetRealmsWithParams returns top-level representation of all realms with optional query params
+	GetRealmsWithParams(ctx context.Context, token string, params *GetRealmsParams) ([]*RealmRepresentation, error)
 	// CreateRealm creates a realm
 	CreateRealm(ctx context.Context, token string, realm RealmRepresentation) (string, error)
 	// UpdateRealm updates a given realm
@@ -548,6 +564,10 @@ type GoCloakIface interface {
 	GetEvents(ctx context.Context, token string, realm string, params GetEventsParams) ([]*EventRepresentation, error)
 	// GetAdminEvents returns admin events
 	GetAdminEvents(ctx context.Context, token string, realm string, params GetAdminEventsParams) ([]*AdminEventRepresentation, error)
+	// DeleteAdminEvents deletes all admin events
+	DeleteAdminEvents(ctx context.Context, token, realm string) error
+	// GetClientSessionStats returns client session statistics (client id to active session count)
+	GetClientSessionStats(ctx context.Context, token, realm string) (map[string]int, error)
 	// GetClientScopesScopeMappingsRealmRolesAvailable returns realm-level roles that are available to attach to this client scope
 	GetClientScopesScopeMappingsRealmRolesAvailable(ctx context.Context, token, realm, clientScopeID string) ([]*Role, error)
 	// GetClientScopesScopeMappingsRealmRoles returns roles associated with a client-scope

@@ -1533,6 +1533,116 @@ func (g *GoCloak) RegenerateClientSecret(ctx context.Context, token, realm, idOf
 	return &result, nil
 }
 
+// GetRotatedClientSecret returns the rotated client secret if rotation is enabled
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#_clients_resource
+func (g *GoCloak) GetRotatedClientSecret(ctx context.Context, token, realm, idOfClient string) (*CredentialRepresentation, error) {
+	const errMessage = "could not get rotated client secret"
+
+	var result CredentialRepresentation
+	resp, err := g.GetRequestWithBearerAuth(ctx, token).
+		SetResult(&result).
+		Get(g.getAdminRealmURL(realm, "clients", idOfClient, "client-secret", "rotated"))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// InvalidateRotatedClientSecret invalidates the rotated secret for the client
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#_clients_resource
+func (g *GoCloak) InvalidateRotatedClientSecret(ctx context.Context, token, realm, idOfClient string) error {
+	const errMessage = "could not invalidate rotated client secret"
+
+	resp, err := g.GetRequestWithBearerAuth(ctx, token).
+		Delete(g.getAdminRealmURL(realm, "clients", idOfClient, "client-secret", "rotated"))
+
+	return checkForError(resp, err, errMessage)
+}
+
+// CreateClientInitialAccess creates a new initial access token
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#_client_initial_access_resource
+func (g *GoCloak) CreateClientInitialAccess(ctx context.Context, token, realm string, config ClientInitialAccessCreatePresentation) (*ClientInitialAccessPresentation, error) {
+	const errMessage = "could not create client initial access"
+
+	var result ClientInitialAccessPresentation
+	resp, err := g.GetRequestWithBearerAuth(ctx, token).
+		SetBody(config).
+		SetResult(&result).
+		Post(g.getAdminRealmURL(realm, "clients-initial-access"))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// GetClientInitialAccess returns all initial access tokens for the realm
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#_client_initial_access_resource
+func (g *GoCloak) GetClientInitialAccess(ctx context.Context, token, realm string) ([]*ClientInitialAccessPresentation, error) {
+	const errMessage = "could not get client initial access"
+
+	var result []*ClientInitialAccessPresentation
+	resp, err := g.GetRequestWithBearerAuth(ctx, token).
+		SetResult(&result).
+		Get(g.getAdminRealmURL(realm, "clients-initial-access"))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// DeleteClientInitialAccess deletes an initial access token
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#_client_initial_access_resource
+func (g *GoCloak) DeleteClientInitialAccess(ctx context.Context, token, realm, initialAccessID string) error {
+	const errMessage = "could not delete client initial access"
+
+	resp, err := g.GetRequestWithBearerAuth(ctx, token).
+		Delete(g.getAdminRealmURL(realm, "clients-initial-access", initialAccessID))
+
+	return checkForError(resp, err, errMessage)
+}
+
+// GetClientCertificate returns the key info for a client certificate attribute
+// attr is typically "saml.signing" or "saml.encryption"
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#_client_attribute_certificate_resource
+func (g *GoCloak) GetClientCertificate(ctx context.Context, token, realm, idOfClient, attr string) (*CertificateRepresentation, error) {
+	const errMessage = "could not get client certificate"
+
+	var result CertificateRepresentation
+	resp, err := g.GetRequestWithBearerAuth(ctx, token).
+		SetResult(&result).
+		Get(g.getAdminRealmURL(realm, "clients", idOfClient, "certificates", attr))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// GenerateClientCertificate generates a new certificate with new key pair for the client
+// attr is typically "saml.signing" or "saml.encryption"
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#_client_attribute_certificate_resource
+func (g *GoCloak) GenerateClientCertificate(ctx context.Context, token, realm, idOfClient, attr string) (*CertificateRepresentation, error) {
+	const errMessage = "could not generate client certificate"
+
+	var result CertificateRepresentation
+	resp, err := g.GetRequestWithBearerAuth(ctx, token).
+		SetResult(&result).
+		Post(g.getAdminRealmURL(realm, "clients", idOfClient, "certificates", attr, "generate"))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 // GetClientOfflineSessions returns offline sessions associated with the client
 func (g *GoCloak) GetClientOfflineSessions(ctx context.Context, token, realm, idOfClient string, params ...GetClientUserSessionsParams) ([]*UserSessionRepresentation, error) {
 	const errMessage = "could not get client offline sessions"
@@ -2491,13 +2601,26 @@ func (g *GoCloak) GetRealm(ctx context.Context, token, realm string) (*RealmRepr
 
 // GetRealms returns top-level representation of all realms
 func (g *GoCloak) GetRealms(ctx context.Context, token string) ([]*RealmRepresentation, error) {
+	return g.GetRealmsWithParams(ctx, token, nil)
+}
+
+// GetRealmsWithParams returns top-level representation of all realms with optional query params
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#_realms_admin_resource
+func (g *GoCloak) GetRealmsWithParams(ctx context.Context, token string, params *GetRealmsParams) ([]*RealmRepresentation, error) {
 	const errMessage = "could not get realms"
 
 	var result []*RealmRepresentation
-	resp, err := g.GetRequestWithBearerAuth(ctx, token).
-		SetResult(&result).
-		Get(g.getAdminRealmURL(""))
+	req := g.GetRequestWithBearerAuth(ctx, token).SetResult(&result)
 
+	if params != nil {
+		queryParams, err := GetQueryParams(params)
+		if err != nil {
+			return nil, errors.Wrap(err, errMessage)
+		}
+		req = req.SetQueryParams(queryParams)
+	}
+
+	resp, err := req.Get(g.getAdminRealmURL(""))
 	if err = checkForError(resp, err, errMessage); err != nil {
 		return nil, err
 	}
@@ -4281,6 +4404,37 @@ func (g *GoCloak) GetAdminEvents(ctx context.Context, token string, realm string
 		return nil, err
 	}
 
+	return result, nil
+}
+
+// DeleteAdminEvents deletes all admin events
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#_realms_admin_resource
+func (g *GoCloak) DeleteAdminEvents(ctx context.Context, token, realm string) error {
+	const errMessage = "could not delete admin events"
+
+	resp, err := g.GetRequestWithBearerAuth(ctx, token).
+		Delete(g.getAdminRealmURL(realm, "admin-events"))
+
+	return checkForError(resp, err, errMessage)
+}
+
+// GetClientSessionStats returns client session statistics (client id to active session count)
+// https://www.keycloak.org/docs-api/latest/rest-api/index.html#_realms_admin_resource
+func (g *GoCloak) GetClientSessionStats(ctx context.Context, token, realm string) (map[string]int, error) {
+	const errMessage = "could not get client session stats"
+
+	var result map[string]int
+	resp, err := g.GetRequestWithBearerAuth(ctx, token).
+		SetResult(&result).
+		Get(g.getAdminRealmURL(realm, "client-session-stats"))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	if result == nil {
+		return make(map[string]int), nil
+	}
 	return result, nil
 }
 

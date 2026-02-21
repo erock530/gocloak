@@ -6,28 +6,39 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Go environment
-        uses: actions/setup-go@v5.0.2
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version: '1.25'
           cache: true
 
-      - name: Checkout code
-        uses: actions/checkout@v4.1.7
-
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6.1.0
+        uses: golangci/golangci-lint-action@v6
 
-      - name: WriteGoList
+      - name: Write go.list for nancy
         run: go list -json -m all > go.list
 
-      - name: nancy
+      - name: Nancy (dependency vulnerability scan)
         uses: sonatype-nexus-community/nancy-github-action@main
 
-      - name: Run Keycloak
+      - name: Start Keycloak
+        run: make start-keycloak
+
+      - name: Wait for Keycloak
         run: |
-          make start-keycloak
-          sleep 15
+          echo "Waiting for Keycloak to be ready..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:9000/health/ready > /dev/null 2>&1; then
+              echo "Keycloak is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Keycloak failed to start in time"
+          exit 1
 
       - name: Unit Tests
         run: |
@@ -41,8 +52,8 @@ jobs:
           docker ps
           docker logs keycloak
 
-      - name: CodeCov
-        uses: codecov/codecov-action@v4.5.0
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
         with:
           file: ./coverage.txt
 
