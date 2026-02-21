@@ -63,6 +63,19 @@ jobs:
           file: ./coverage.txt
 
       # Publish benchmarks for the main branch only
+      - name: Ensure gh-pages branch exists
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if ! git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git checkout --orphan gh-pages
+            git reset --hard
+            echo "# Benchmark results" > index.html
+            git add index.html
+            git commit -m "Initialize gh-pages for benchmark charts"
+            git push origin gh-pages
+            git checkout main
+          fi
+
       - name: Store Benchmark Result
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: rhysd/github-action-benchmark@v1.20.3
