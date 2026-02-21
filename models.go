@@ -601,8 +601,8 @@ type PolicyRepresentation struct {
 
 // RolePolicyRepresentation represents role based policies
 type RolePolicyRepresentation struct {
-	FetchRoles *bool              `json:"fetchRoles,omitempty"`
-	Roles      *[]RoleDefinition  `json:"roles,omitempty"`
+	FetchRoles *bool             `json:"fetchRoles,omitempty"`
+	Roles      *[]RoleDefinition `json:"roles,omitempty"`
 }
 
 // JSPolicyRepresentation represents js based policies
@@ -1499,12 +1499,12 @@ type ClientInitialAccessCreatePresentation struct {
 // ClientInitialAccessPresentation represents an initial access token
 // https://www.keycloak.org/docs-api/latest/rest-api/index.html#ClientInitialAccessPresentation
 type ClientInitialAccessPresentation struct {
-	ID              *string `json:"id,omitempty"`
-	Token           *string `json:"token,omitempty"`
-	Timestamp       *int64  `json:"timestamp,omitempty"`
-	Expiration      *int64  `json:"expiration,omitempty"`
-	Count           *int    `json:"count,omitempty"`
-	RemainingCount  *int    `json:"remainingCount,omitempty"`
+	ID             *string `json:"id,omitempty"`
+	Token          *string `json:"token,omitempty"`
+	Timestamp      *int64  `json:"timestamp,omitempty"`
+	Expiration     *int64  `json:"expiration,omitempty"`
+	Count          *int    `json:"count,omitempty"`
+	RemainingCount *int    `json:"remainingCount,omitempty"`
 }
 
 // KeyStoreConfigImport represents configuration for keystore import/export
@@ -1711,10 +1711,10 @@ func (v *PermissionGrantResponseRepresentation) String() string     { return pre
 func (v *GetUserPermissionParams) String() string                   { return prettyStringStruct(v) }
 func (v *ResourcePolicyRepresentation) String() string              { return prettyStringStruct(v) }
 func (v *GetResourcePoliciesParams) String() string                 { return prettyStringStruct(v) }
-func (v *CertificateRepresentation) String() string                     { return prettyStringStruct(v) }
-func (v *ClientInitialAccessCreatePresentation) String() string         { return prettyStringStruct(v) }
-func (v *ClientInitialAccessPresentation) String() string               { return prettyStringStruct(v) }
-func (v *KeyStoreConfigImport) String() string                          { return prettyStringStruct(v) }
+func (v *CertificateRepresentation) String() string                 { return prettyStringStruct(v) }
+func (v *ClientInitialAccessCreatePresentation) String() string     { return prettyStringStruct(v) }
+func (v *ClientInitialAccessPresentation) String() string           { return prettyStringStruct(v) }
+func (v *KeyStoreConfigImport) String() string                      { return prettyStringStruct(v) }
 func (v *CredentialRepresentation) String() string                  { return prettyStringStruct(v) }
 func (v *RequiredActionProviderRepresentation) String() string      { return prettyStringStruct(v) }
 func (v *BruteForceStatus) String() string                          { return prettyStringStruct(v) }
