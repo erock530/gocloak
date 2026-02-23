@@ -17,6 +17,8 @@ jobs:
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
+        with:
+          version: v2.10.1
 
       - name: Write go.list for nancy
         run: go list -json -m all > go.list
