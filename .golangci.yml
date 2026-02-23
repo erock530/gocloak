@@ -1,6 +1,7 @@
 version: "2"
 
 linters:
+  default: fast
   enable:
     - goimports
     - gofmt
@@ -10,31 +11,26 @@ linters:
     - revive
     - gocognit
     - gocyclo
-  fast: true
-
-linters-settings:
-  misspell:
-    locale: US
-  goimports:
-    local-prefixes: github.com/erock530/gocloak
-  gocognit:
-    min-complexity: 15
-  gocyclo:
-    min-complexity: 15
-  gofmt:
-    simplify: true
-
-issues:
-  exclude-dirs:
-    - (^|/)testdata($|/)
-  exclude-dirs-use-default: false
-  exclude-use-default: false
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gocyclo
-        - dupl
-        - gosec
-        - gocognit
-  exclude:
-    - should have a package comment
+  settings:
+    misspell:
+      locale: US
+    goimports:
+      local-prefixes:
+        - github.com/erock530/gocloak
+    gocognit:
+      min-complexity: 15
+    gocyclo:
+      min-complexity: 15
+    gofmt:
+      simplify: true
+  exclusions:
+    paths:
+      - (^|/)testdata($|/)
+    rules:
+      - path: _test\.go
+        linters:
+          - gocyclo
+          - dupl
+          - gosec
+          - gocognit
+      - text: "should have a package comment"
