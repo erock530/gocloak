@@ -14,15 +14,10 @@ linters:
   settings:
     misspell:
       locale: US
-    goimports:
-      local-prefixes:
-        - github.com/erock530/gocloak
     gocognit:
       min-complexity: 15
     gocyclo:
       min-complexity: 15
-    gofmt:
-      simplify: true
   exclusions:
     paths:
       - (^|/)testdata($|/)
@@ -34,3 +29,14 @@ linters:
           - gosec
           - gocognit
       - text: "should have a package comment"
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    gofmt:
+      simplify: true
+    goimports:
+      local-prefixes:
+        - github.com/erock530/gocloak
