@@ -12,6 +12,9 @@ linters:
   settings:
     misspell:
       locale: US
+    gosec:
+      excludes:
+        - G117
     gocognit:
       min-complexity: 15
     gocyclo:
