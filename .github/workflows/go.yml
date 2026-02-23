@@ -1,7 +1,8 @@
 name: Tests
 on:
-  - push
-  - pull_request
+  push:
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -23,7 +24,8 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    # Run on PRs, or on push to non-main (e.g. release-please branch) so status is reported on the PR
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/main')
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
