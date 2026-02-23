@@ -26,7 +26,6 @@ linters:
       - path: _test\.go
         linters:
           - gocyclo
-          - dupl
           - gosec
           - gocognit
       - text: "should have a package comment"
