@@ -2,21 +2,37 @@ name: Tests
 on:
   - push
   - pull_request
+
+permissions:
+  contents: read
+
 jobs:
-  tests:
+  lint:
+    name: lint
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.25.7"
+          cache: true
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.10.1
+
+  tests:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.24'
+          go-version: "1.25.7"
           cache: true
-
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
 
       - name: Write go.list for nancy
         run: go list -json -m all > go.list
@@ -62,9 +78,53 @@ jobs:
         with:
           file: ./coverage.txt
 
-      # Publish benchmarks for the main branch only
+      # Updating go report card for main branch only
+      # - name: GoReportCard
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   run: curl --fail --request POST "https://goreportcard.com/checks" --data "repo=github.com/erock530/gocloak"
+
+  publish-benchmarks:
+    name: publish-benchmarks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25.7"
+          cache: true
+
+      - name: Start Keycloak
+        env:
+          KC_HOSTNAME: "127.0.0.1"
+        run: make start-keycloak
+
+      - name: Wait for Keycloak
+        run: |
+          echo "Waiting for Keycloak to be ready..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:9000/health/ready > /dev/null 2>&1; then
+              echo "Keycloak is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Keycloak failed to start in time"
+          exit 1
+
+      - name: Run benchmarks
+        env:
+          GOCLOAK_TEST_HOSTNAME: "http://127.0.0.1:8080"
+        run: |
+          go test -failfast -race -cover -coverprofile=coverage.txt -covermode=atomic -p 100 -cpu 1,2 -bench . -benchmem > test.log
+          cat test.log
+
       - name: Ensure gh-pages branch exists
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           if ! git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
             git config user.name "github-actions[bot]"
@@ -79,18 +139,9 @@ jobs:
           fi
 
       - name: Store Benchmark Result
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: rhysd/github-action-benchmark@v1.20.3
         with:
-          # What benchmark tool the output.txt came from
           tool: "go"
-          # Where the output from the benchmark tool is stored
           output-file-path: test.log
-          # Push and deploy GitHub pages branch automatically
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
-
-      # Updating go report card for main branch only
-      # - name: GoReportCard
-      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      #   run: curl --fail --request POST "https://goreportcard.com/checks" --data "repo=github.com/erock530/gocloak"
