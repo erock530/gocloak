@@ -74,4 +74,4 @@ For a full list of additions, fixes, and changes (including Organizations suppor
 
 ## License
 
-See the [original repository](https://github.com/Nerzal/gocloak) for license information.
+This project is licensed under the Apache License 2.0 — see the [LICENSE](LICENSE) file for the full text. This repository is a fork of [Nerzal/gocloak](https://github.com/Nerzal/gocloak); the original work remains under its authors’ copyright as noted in LICENSE.
