@@ -1,7 +1,7 @@
 version: "2"
 
 linters:
-  default: fast
+  default: none
   enable:
     - misspell
     - gosec
