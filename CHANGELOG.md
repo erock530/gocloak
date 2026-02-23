@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Releases are automated via [release-please](https://github.com/googleapis/release-please).
 Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, etc.) to drive version bumps.
 
+## [1.0.2](https://github.com/erock530/gocloak/compare/v1.0.1...v1.0.2) (2026-02-23)
+
+
+### ### Documentation
+
+* update README and add LICENSE reference; ci: golangci-lint v2, separate lint/tests jobs, publish-benchmarks on push to main ([74f1c90](https://github.com/erock530/gocloak/commit/74f1c9028bf1d82b9c4f71d82f5ed7652fe7b8c9))
+
+
+### ### Changed
+
+* run tests on push to non-main so release PR gets status ([#4](https://github.com/erock530/gocloak/issues/4)) ([f534e71](https://github.com/erock530/gocloak/commit/f534e71897f5b55634a5c36e22f343b8110d3180))
+
 ## [1.0.1](https://github.com/erock530/gocloak/compare/v1.0.0...v1.0.1) (2026-02-21)
 
 
